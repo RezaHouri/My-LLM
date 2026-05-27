@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Data (large downloads)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/rhino_sft.jsonl
+
+# Models & checkpoints
+*.safetensors
+*.bin
+*.gguf
+checkpoints/
+outputs/
+rhino-qwen*/
+
+# Colab / HF cache
+.cache/
+.huggingface/
+drive/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Secrets
+.env
+*.token
+hf_token.txt
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Eval outputs
+eval/runs/
+eval/*.jsonl
+!eval/prompts.jsonl

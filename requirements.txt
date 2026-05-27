@@ -1,0 +1,8 @@
+# Local data prep only (Colab notebooks install their own deps)
+pyyaml>=6.0.1
+requests>=2.31.0
+tqdm>=4.66.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+datasets>=2.18.0
+jsonlines>=4.0.0

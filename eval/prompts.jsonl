@@ -1,0 +1,40 @@
+{"id": "py-sphere-01", "prompt": "In Rhino.Python, add a sphere at (2, 3, 1) with radius 4.5.", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "py-box-01", "prompt": "Rhino.Python: create an axis-aligned box from (0,0,0) to (20, 15, 10).", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "py-layer-01", "prompt": "Create a layer named 'Export' and move selected objects to it.", "meta": {"lang": "python", "topic": "layers"}}
+{"id": "py-select-01", "prompt": "Select all mesh objects on the current layer using rhinoscriptsyntax.", "meta": {"lang": "python", "topic": "selection"}}
+{"id": "py-boolean-01", "prompt": "Boolean union two selected closed polysurfaces in Rhino.Python with failure message.", "meta": {"lang": "python", "topic": "booleans"}}
+{"id": "py-mesh-01", "prompt": "Mesh a selected brep with default density in Rhino.Python.", "meta": {"lang": "python", "topic": "mesh"}}
+{"id": "py-transform-01", "prompt": "Rotate selected objects 45 degrees around the world Z axis at the origin.", "meta": {"lang": "python", "topic": "transform"}}
+{"id": "py-curve-01", "prompt": "Add an interpolated curve through 4 picked points in Rhino.Python.", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "py-analysis-01", "prompt": "Print the area of a selected closed curve.", "meta": {"lang": "python", "topic": "analysis"}}
+{"id": "py-io-01", "prompt": "Export selected objects to a user-picked .3dm path using rs.", "meta": {"lang": "python", "topic": "io"}}
+{"id": "cs-sphere-01", "prompt": "RhinoCommon C#: add a sphere centered at (5,0,0) with radius 3.", "meta": {"lang": "csharp", "topic": "geometry"}}
+{"id": "cs-box-01", "prompt": "C# command: create a box from two corner points.", "meta": {"lang": "csharp", "topic": "geometry"}}
+{"id": "cs-boolean-01", "prompt": "RhinoCommon: boolean intersection of two breps with tolerance from the document.", "meta": {"lang": "csharp", "topic": "booleans"}}
+{"id": "cs-units-01", "prompt": "Set the document unit system to meters in C#.", "meta": {"lang": "csharp", "topic": "document"}}
+{"id": "cs-selection-01", "prompt": "C#: count selected curves in the active document.", "meta": {"lang": "csharp", "topic": "selection"}}
+{"id": "cs-mesh-01", "prompt": "Create a mesh from a brep using MeshingParameters.Coarse in RhinoCommon.", "meta": {"lang": "csharp", "topic": "mesh"}}
+{"id": "cs-extrude-01", "prompt": "Extrude a closed planar curve 25 units along Z in C#.", "meta": {"lang": "csharp", "topic": "geometry"}}
+{"id": "cs-layer-01", "prompt": "Add a child layer under 'Default' named 'Parts' in RhinoCommon.", "meta": {"lang": "csharp", "topic": "layers"}}
+{"id": "cs-gh-01", "prompt": "Grasshopper C# script: bake a list of Breps into the Rhino document.", "meta": {"lang": "csharp", "topic": "grasshopper"}}
+{"id": "cs-transform-01", "prompt": "Mirror a brep across the YZ plane in C#.", "meta": {"lang": "csharp", "topic": "transform"}}
+{"id": "concept-rs-01", "prompt": "When should I use rhinoscriptsyntax instead of Rhino.Geometry in Rhino 8 Python?", "meta": {"lang": "concept", "topic": "api_design"}}
+{"id": "concept-tol-01", "prompt": "How does document tolerance affect boolean operations?", "meta": {"lang": "concept", "topic": "tolerance"}}
+{"id": "concept-doc-01", "prompt": "Explain RhinoDoc.ActiveDoc vs scriptcontext.doc for beginners.", "meta": {"lang": "concept", "topic": "python_runtime"}}
+{"id": "concept-naked-01", "prompt": "What are naked edges and how do they break meshing?", "meta": {"lang": "concept", "topic": "mesh"}}
+{"id": "concept-gh-01", "prompt": "How does Grasshopper geometry differ from document objects?", "meta": {"lang": "concept", "topic": "grasshopper"}}
+{"id": "py-brep-01", "prompt": "Create a brep sphere using Rhino.Geometry in a Rhino.Python script and add it to the document.", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "py-offset-01", "prompt": "Offset a selected curve by 1.5 model units outward in Rhino.Python.", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "cs-split-01", "prompt": "Split a brep with a plane in RhinoCommon C#.", "meta": {"lang": "csharp", "topic": "booleans"}}
+{"id": "cs-attr-01", "prompt": "Assign a user string key 'part_id' to selected objects in C#.", "meta": {"lang": "csharp", "topic": "attributes"}}
+{"id": "py-group-01", "prompt": "Group all selected objects in Rhino.Python.", "meta": {"lang": "python", "topic": "attributes"}}
+{"id": "concept-compute-01", "prompt": "How should I handle RhinoDoc when running scripts on Rhino.Compute?", "meta": {"lang": "concept", "topic": "compute"}}
+{"id": "py-trim-01", "prompt": "Trim a surface with a closed curve in Rhino.Python (high level steps).", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "cs-volume-01", "prompt": "Compute volume of a closed brep in C# if solid.", "meta": {"lang": "csharp", "topic": "analysis"}}
+{"id": "py-instance-01", "prompt": "Insert a block named 'Bolt' at the world origin in rs.", "meta": {"lang": "python", "topic": "blocks"}}
+{"id": "cs-instance-01", "prompt": "Insert block definition 'Fixture' at a point in RhinoCommon.", "meta": {"lang": "csharp", "topic": "blocks"}}
+{"id": "concept-units-01", "prompt": "Why does importing a file in inches fail boolean union with mm geometry?", "meta": {"lang": "concept", "topic": "document"}}
+{"id": "py-view-01", "prompt": "Set the active view to Shaded display mode in Rhino.Python.", "meta": {"lang": "python", "topic": "view"}}
+{"id": "cs-view-01", "prompt": "Zoom to a bounding box in C# for the active view.", "meta": {"lang": "csharp", "topic": "view"}}
+{"id": "py-pipe-01", "prompt": "Create a pipe along a selected curve, radius 2, in Rhino.Python.", "meta": {"lang": "python", "topic": "geometry"}}
+{"id": "cs-pipe-01", "prompt": "Create a pipe brep from a curve and radius in RhinoCommon.", "meta": {"lang": "csharp", "topic": "geometry"}}

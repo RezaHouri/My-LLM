@@ -1,0 +1,48 @@
+# QLoRA SFT defaults for Rhino expert (Qwen2.5-Coder-3B on Colab T4)
+model:
+  base: "Qwen/Qwen2.5-Coder-3B-Instruct"
+  fallback_base: "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+  load_in_4bit: true
+  dtype: "bfloat16"
+
+lora:
+  r: 32
+  lora_alpha: 64
+  lora_dropout: 0.05
+  target_modules: "all-linear"  # Unsloth default
+  bias: "none"
+
+training:
+  num_train_epochs: 2
+  learning_rate: 2.0e-4
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  max_seq_length: 2048
+  warmup_ratio: 0.03
+  lr_scheduler_type: "cosine"
+  optim: "adamw_8bit"
+  weight_decay: 0.01
+  logging_steps: 10
+  save_steps: 100
+  packing: false
+  dataset_text_field: null  # use messages format
+
+data:
+  train_file: "data/processed/rhino_sft.jsonl"
+  eval_split_ratio: 0.1
+  seed: 42
+
+system_prompt: |
+  You are a Rhino 3D expert. Prefer Rhino.Python or RhinoCommon C# as asked.
+  Give runnable code and brief notes. Mention RhinoDoc.ActiveDoc or scriptcontext
+  when document context matters.
+
+export:
+  adapter_dir: "rhino-qwen3b-lora"
+  merged_dir: "rhino-qwen3b-merged"
+  gguf_quant: "q4_k_m"
+
+oom_fallbacks:
+  - reduce max_seq_length to 1024
+  - reduce lora r to 16 and lora_alpha to 32
+  - switch base to fallback_base
