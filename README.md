@@ -25,7 +25,7 @@ Training file: `data/processed/rhino_sft.jsonl` (chat JSONL with `messages` + `m
 
 ### 2. Train on Colab (GPU)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USER/My-LLM/blob/main/notebooks/02_train_rhino_llm.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RezaHouri/My-LLM/blob/main/notebooks/02_train_rhino_llm.ipynb)
 
 1. Runtime → **GPU** (T4).
 2. Hugging Face login (`HF_TOKEN`) for model download.
@@ -34,7 +34,7 @@ Training file: `data/processed/rhino_sft.jsonl` (chat JSONL with `messages` + `m
 
 ### 3. Chat & export
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USER/My-LLM/blob/main/notebooks/03_chat_and_export.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RezaHouri/My-LLM/blob/main/notebooks/03_chat_and_export.ipynb)
 
 - Gradio chat with LoRA
 - Optional merge to full HF weights
