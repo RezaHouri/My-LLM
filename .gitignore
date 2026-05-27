@@ -16,6 +16,7 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 !data/processed/rhino_sft.jsonl
+!data/processed/rhino_sft_eval.jsonl
 
 # Models & checkpoints
 *.safetensors
@@ -24,6 +25,7 @@ data/processed/*
 checkpoints/
 outputs/
 rhino-qwen*/
+rhino-gemma*/
 
 # Colab / HF cache
 .cache/

@@ -1,7 +1,8 @@
-# QLoRA SFT defaults for Rhino expert (Qwen2.5-Coder-3B on Colab T4)
+# QLoRA SFT defaults for Rhino expert (Gemma 4 on Colab T4 / local GPU)
+# Accept model license: https://huggingface.co/google/gemma-4-E4B-it
 model:
-  base: "Qwen/Qwen2.5-Coder-3B-Instruct"
-  fallback_base: "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+  base: "google/gemma-4-E4B-it"
+  fallback_base: "google/gemma-4-E2B-it"
   load_in_4bit: true
   dtype: "bfloat16"
 
@@ -29,6 +30,7 @@ training:
 
 data:
   train_file: "data/processed/rhino_sft.jsonl"
+  eval_file: "data/processed/rhino_sft_eval.jsonl"
   eval_split_ratio: 0.1
   seed: 42
 
@@ -38,11 +40,11 @@ system_prompt: |
   when document context matters.
 
 export:
-  adapter_dir: "rhino-qwen3b-lora"
-  merged_dir: "rhino-qwen3b-merged"
+  adapter_dir: "rhino-gemma4-e4b-lora"
+  merged_dir: "rhino-gemma4-e4b-merged"
   gguf_quant: "q4_k_m"
 
 oom_fallbacks:
   - reduce max_seq_length to 1024
   - reduce lora r to 16 and lora_alpha to 32
-  - switch base to fallback_base
+  - switch base to fallback_base (E2B)

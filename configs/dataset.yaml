@@ -1,0 +1,24 @@
+# Targets for scripts/build_huge_dataset.py
+output:
+  train: data/processed/rhino_sft.jsonl
+  eval: data/processed/rhino_sft_eval.jsonl
+  eval_ratio: 0.1
+
+download:
+  max_doc_pages: 150
+  crawl_guides: true
+  request_delay_sec: 1.0
+
+build:
+  augment_per_file: 4          # prompt variants per sample code file
+  chunk_large_files: true
+  chunk_min_lines: 8
+  chunk_max_chars: 6000
+
+synthetic:
+  count: 12000                 # template combinations (deduped)
+  seed: 42
+
+targets:
+  min_rows_recommended: 3000
+  goal_rows: 10000

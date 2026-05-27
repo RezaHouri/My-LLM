@@ -3,13 +3,13 @@
 Download public Rhino training sources into data/raw/.
 
 Sources:
-  - mcneel/rhino-developer-samples (GitHub archive or sparse clone)
-  - developer.rhino3d.com guide pages (polite, rate-limited)
+  - mcneel/rhino-developer-samples (GitHub archive)
+  - developer.rhino3d.com guides (seed URLs + optional crawl)
 
 Usage:
   python scripts/download_sources.py
+  python scripts/download_sources.py --crawl-guides --max-pages 150
   python scripts/download_sources.py --samples-only
-  python scripts/download_sources.py --docs-only --max-pages 20
 """
 
 from __future__ import annotations
@@ -20,7 +20,6 @@ import json
 import re
 import sys
 import time
-import zipfile
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -34,19 +33,28 @@ SAMPLES_ARCHIVE_URL = (
 SAMPLES_DIR = RAW_DIR / "rhino-developer-samples"
 DOCS_DIR = RAW_DIR / "developer_docs"
 MANIFEST_PATH = RAW_DIR / "download_manifest.json"
+GUIDES_INDEX = "https://developer.rhino3d.com/guides/"
 
-# Curated developer.rhino3d.com entry points (expand in phase 2)
 DOC_SEED_URLS = [
     "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-introduction/",
     "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-object-selection/",
     "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-geometry/",
+    "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-curve/",
+    "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-surface/",
+    "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-mesh/",
+    "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-layer/",
+    "https://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-transformation/",
     "https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/",
     "https://developer.rhino3d.com/guides/rhinocommon/creating-a-rhinocommon-plugin/",
+    "https://developer.rhino3d.com/guides/rhinocommon/command-line-options/",
     "https://developer.rhino3d.com/guides/grasshopper/csharp-gh-scripting/",
+    "https://developer.rhino3d.com/guides/grasshopper/python-gh-scripting/",
+    "https://developer.rhino3d.com/guides/rhinocommon/rhinocommon-101/",
+    "https://developer.rhino3d.com/guides/rhinocommon/using-rhinocommon/",
 ]
 
 USER_AGENT = "RhinoColabLLM/1.0 (educational; +https://github.com/mcneel/rhino-developer-samples)"
-REQUEST_DELAY_SEC = 1.5
+REQUEST_DELAY_SEC = 1.0
 
 
 def _session() -> requests.Session:
@@ -57,6 +65,8 @@ def _session() -> requests.Session:
 
 def download_developer_samples(force: bool = False) -> Path:
     """Fetch mcneel/rhino-developer-samples as a zip into data/raw/."""
+    import zipfile
+
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     marker = SAMPLES_DIR / ".downloaded"
     if marker.exists() and not force:
@@ -82,7 +92,6 @@ def download_developer_samples(force: bool = False) -> Path:
     print("Extracting archive ...")
     SAMPLES_DIR.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zip_path, "r") as zf:
-        # Extract into SAMPLES_DIR (strip top-level folder name)
         for name in zf.namelist():
             if name.endswith("/"):
                 continue
@@ -119,43 +128,90 @@ def _extract_main_text(html: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text)
 
 
-def download_doc_pages(urls: list[str], max_pages: int | None = None) -> list[Path]:
+def discover_guide_urls(sess: requests.Session, max_urls: int = 200) -> list[str]:
+    """Crawl developer.rhino3d.com/guides/ for guide links."""
+    found: list[str] = []
+    seen: set[str] = set()
+
+    def add(url: str) -> None:
+        if url in seen:
+            return
+        if "/guides/" not in url:
+            return
+        if not url.endswith("/"):
+            url = url + "/"
+        seen.add(url)
+        found.append(url)
+
+    for seed in DOC_SEED_URLS:
+        add(seed)
+
+    try:
+        print(f"Crawling index: {GUIDES_INDEX}")
+        resp = sess.get(GUIDES_INDEX, timeout=60)
+        resp.raise_for_status()
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(resp.text, "lxml")
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            full = urljoin(GUIDES_INDEX, href)
+            if "developer.rhino3d.com/guides/" in full:
+                add(full.split("#")[0])
+            if len(found) >= max_urls:
+                break
+        time.sleep(REQUEST_DELAY_SEC)
+    except requests.RequestException as e:
+        print(f"  crawl index skipped: {e}")
+
+    return found[:max_urls]
+
+
+def download_doc_pages(
+    urls: list[str],
+    max_pages: int | None = None,
+    delay: float = REQUEST_DELAY_SEC,
+) -> list[Path]:
     """Politely fetch developer.rhino3d.com guide HTML/text."""
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     sess = _session()
     saved: list[Path] = []
     targets = urls[: max_pages or len(urls)]
 
-    for url in targets:
+    for i, url in enumerate(targets):
         slug = hashlib.md5(url.encode()).hexdigest()[:12]
         out = DOCS_DIR / f"{slug}.json"
         if out.exists():
             saved.append(out)
             continue
-        print(f"Fetching doc: {url}")
+        print(f"[{i + 1}/{len(targets)}] Fetch doc: {url}")
         try:
             resp = sess.get(url, timeout=60)
             resp.raise_for_status()
         except requests.RequestException as e:
             print(f"  skip ({e})")
-            time.sleep(REQUEST_DELAY_SEC)
+            time.sleep(delay)
             continue
 
         text = _extract_main_text(resp.text)
+        if len(text) < 100:
+            print("  skip (empty page)")
+            time.sleep(delay)
+            continue
+
         payload = {
             "url": url,
             "title": urlparse(url).path.rstrip("/").split("/")[-1],
-            "text": text[:50000],
+            "text": text[:80000],
         }
         out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         saved.append(out)
-        time.sleep(REQUEST_DELAY_SEC)
+        time.sleep(delay)
 
     return saved
 
 
 def iter_sample_code_files(samples_root: Path) -> list[Path]:
-    """Walk rhino-developer-samples for .py and .cs files."""
     exts = {".py", ".cs"}
     skip_parts = {"bin", "obj", ".git", "packages", "node_modules"}
     files: list[Path] = []
@@ -172,12 +228,13 @@ def iter_sample_code_files(samples_root: Path) -> list[Path]:
     return sorted(files)
 
 
-def write_manifest(samples: Path | None, doc_files: list[Path]) -> None:
+def write_manifest(samples: Path | None, doc_files: list[Path], urls: list[str]) -> None:
     manifest = {
         "samples_dir": str(samples) if samples else None,
         "sample_code_count": len(list(iter_sample_code_files(samples))) if samples else 0,
         "doc_files": [str(p) for p in doc_files],
-        "doc_seed_urls": DOC_SEED_URLS,
+        "doc_urls_fetched": len(doc_files),
+        "doc_seed_count": len(urls),
     }
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(f"Manifest: {MANIFEST_PATH}")
@@ -189,19 +246,31 @@ def main() -> int:
     parser.add_argument("--samples-only", action="store_true")
     parser.add_argument("--docs-only", action="store_true")
     parser.add_argument("--max-pages", type=int, default=None)
+    parser.add_argument(
+        "--crawl-guides",
+        action="store_true",
+        help="Discover extra guide URLs from developer.rhino3d.com/guides/",
+    )
+    parser.add_argument("--delay", type=float, default=REQUEST_DELAY_SEC)
     args = parser.parse_args()
 
     samples_path: Path | None = None
     doc_files: list[Path] = []
+    doc_urls = list(DOC_SEED_URLS)
 
     if not args.docs_only:
         samples_path = download_developer_samples(force=args.force)
 
     if not args.samples_only:
-        doc_files = download_doc_pages(DOC_SEED_URLS, max_pages=args.max_pages)
+        sess = _session()
+        if args.crawl_guides:
+            max_discover = args.max_pages or 150
+            doc_urls = discover_guide_urls(sess, max_urls=max_discover)
+            print(f"Discovered {len(doc_urls)} guide URLs")
+        doc_files = download_doc_pages(doc_urls, max_pages=args.max_pages, delay=args.delay)
 
-    write_manifest(samples_path, doc_files)
-    print("Done. Run: python scripts/build_dataset.py")
+    write_manifest(samples_path, doc_files, doc_urls)
+    print("Done. Run: python scripts/build_huge_dataset.py")
     return 0
 
 
