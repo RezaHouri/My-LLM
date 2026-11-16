@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Write ~50 hand-curated seed rows to data/processed/rhino_sft.jsonl."""
+"""Write ~50 hand-curated seed rows to data/processed/rhino_sft.jsonl.
+
+Refuses to overwrite a non-empty dataset unless --force is passed, because the
+shipped training file is the full corpus.
+"""
+import argparse
 import json
 from pathlib import Path
 
@@ -62,7 +67,30 @@ SEED = [
 ]
 
 
-def main():
+def _row_count(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(1 for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, default=OUT)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace a non-empty dataset with the curated seed",
+    )
+    args = parser.parse_args()
+
+    existing = _row_count(args.out)
+    if existing and not args.force:
+        print(
+            f"Keeping existing dataset ({existing} rows) at {args.out}. "
+            f"Pass --force to replace it with {len(SEED)} seed rows."
+        )
+        return 0
+
     rows = []
     for user, assistant, lang, topic in SEED:
         rows.append({
@@ -72,12 +100,13 @@ def main():
             ],
             "meta": {"lang": lang, "topic": topic},
         })
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    with OUT.open("w", encoding="utf-8") as f:
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open("w", encoding="utf-8") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    print(f"Wrote {len(rows)} seed rows -> {OUT}")
+    print(f"Wrote {len(rows)} seed rows -> {args.out}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

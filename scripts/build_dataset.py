@@ -254,10 +254,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # Load before any write. An empty ingestion must not truncate a corpus
+    # that is already on disk, and --finalize-only must not touch an unset name.
+    on_disk = load_jsonl(args.out)
     if args.finalize_only:
-        merged = dedupe(load_jsonl(args.out))
+        merged = dedupe(on_disk)
     else:
-        existing = load_jsonl(args.out) if args.append_seed else []
+        existing = on_disk if args.append_seed else []
         built = ingest_samples(
             SAMPLES_DIR,
             augment=args.augment,
@@ -266,12 +269,15 @@ def main() -> int:
         merged = dedupe(existing + built)
 
     if not merged:
-        if existing:
-            merged = existing
-        else:
-            print("No rows built. Run: python scripts/init_seed.py && python scripts/download_sources.py")
-            write_jsonl(args.out, [])
+        if on_disk:
+            print(
+                f"No rows built; left {len(on_disk)} existing rows unchanged at {args.out}"
+            )
             return 1
+        print("No rows built. Run: python scripts/init_seed.py && python scripts/download_sources.py")
+        if not args.finalize_only:
+            write_jsonl(args.out, [])
+        return 1
 
     if args.split_eval:
         train, eval_rows = train_eval_split(merged, args.eval_ratio)
